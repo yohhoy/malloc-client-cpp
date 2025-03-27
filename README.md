@@ -3,7 +3,7 @@
 C++ client for [malloc REST Server](https://github.com/yohhoy/malloc-server)
 
 ```sh
-# run ./malloc-server
+# run `malloc-server`
 
 $ mkdir build
 $ cd build

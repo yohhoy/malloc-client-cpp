@@ -7,7 +7,7 @@
 #include <type_traits>
 #include <cpr/cpr.h>
 #include <nlohmann/json.hpp>
-using json = nlohmann::json;
+
 
 namespace mc {
 
@@ -25,12 +25,12 @@ public:
 
     RemoteAddress malloc(size_t size)
     {
-        cpr::Body req = json{{"size", size}}.dump();
+        cpr::Body req = nlohmann::json{{"size", size}}.dump();
         cpr::Response r = cpr::Post(cpr::Url{endpoint_ + "/malloc"}, header_, req);
         if (r.error.code != cpr::ErrorCode::OK) {
             throw std::runtime_error(r.error.message);
         }
-        json resp = json::parse(r.text);
+        auto resp = nlohmann::json::parse(r.text);
         if (r.status_code != 200) {
             throw std::runtime_error(resp["error"]);
         }
@@ -39,12 +39,12 @@ public:
 
     void free(RemoteAddress addr)
     {
-        cpr::Body req = json{{"addr", addr}}.dump();
+        cpr::Body req = nlohmann::json{{"addr", addr}}.dump();
         cpr::Response r = cpr::Post(cpr::Url{endpoint_ + "/free"}, header_, req);
         if (r.error.code != cpr::ErrorCode::OK) {
             throw std::runtime_error(r.error.message);
         }
-        json resp = json::parse(r.text);
+        auto resp = nlohmann::json::parse(r.text);
         if (r.status_code != 200) {
             throw std::runtime_error(resp["error"]);
         }
@@ -55,7 +55,7 @@ public:
         if (r.error.code != cpr::ErrorCode::OK) {
             throw std::runtime_error(r.error.message);
         }
-        json resp = json::parse(r.text);
+        auto resp = nlohmann::json::parse(r.text);
         if (r.status_code != 200) {
             throw std::runtime_error(resp["error"]);
         }
@@ -63,12 +63,12 @@ public:
     }
 
     void write_byte(RemoteAddress addr, std::uint8_t val) {
-        cpr::Body req = json{{"val", val}}.dump();
+        cpr::Body req = nlohmann::json{{"val", val}}.dump();
         cpr::Response r = cpr::Put(cpr::Url{std::format("{}/{}", endpoint_, addr)}, header_, req);
         if (r.error.code != cpr::ErrorCode::OK) {
             throw std::runtime_error(r.error.message);
         }
-        json resp = json::parse(r.text);
+        auto resp = nlohmann::json::parse(r.text);
         if (r.status_code != 200) {
             throw std::runtime_error(resp["error"]);
         }
