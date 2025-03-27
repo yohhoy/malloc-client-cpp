@@ -3,53 +3,15 @@
 #ifndef MALLOC_CLIENT_MDSPAN_HPP_
 #define MALLOC_CLIENT_MDSPAN_HPP_
 
+#include <cassert>
 #include "malloc-client.hpp"
 
 namespace mc {
 
-template <typename T>
-class RemoteMemoryProxy {
-public:
-    RemoteMemoryProxy(RemoteMemory& rmem, RemoteAddress addr)
-        : rmem_{rmem}, addr_{addr}
-    {}
-    ~RemoteMemoryProxy() = default;
-
-    RemoteMemoryProxy(const RemoteMemoryProxy&) = delete;
-    RemoteMemoryProxy& operator=(const RemoteMemoryProxy&) = default;
-
-    operator T()
-    {
-        return rmem_.read<T>(addr_);
-    }
-    T operator=(T val)
-    {
-        return rmem_.write<T>(addr_, val);
-    }
-
-private:
-    RemoteMemory& rmem_;
-    const RemoteAddress addr_;
-};
-
 // AccessorPolicy of std::mdspan
 template <typename T>
 class RemoteMemoryAccessor {
-private:
-    struct ElementProxy {
-        RemoteMemory& rmem_;
-        const RemoteAddress addr_;
-
-        ElementProxy(RemoteMemory& rmem, RemoteAddress addr)
-            : rmem_{rmem}, addr_{addr} {}
-        ~ElementProxy() = default;
-        ElementProxy(const ElementProxy&) = delete;
-        void operator=(const ElementProxy&) = delete;
-
-        operator T() { return rmem_.read<T>(addr_); }
-        T operator=(T val) { return rmem_.write<T>(addr_, val); }
-    };
-
+    struct ElementProxy;
 public:
     using element_type = T;
     using data_handle_type = RemoteAddress;
@@ -65,6 +27,7 @@ public:
 
     reference access(data_handle_type p, size_t i) const
     {
+        assert(rmem_ != nullptr);
         return reference{*rmem_, p + sizeof(T) * i};
     }
 
@@ -72,6 +35,27 @@ public:
     {
         return p + sizeof(T) * i;
     }
+
+private:
+    struct ElementProxy {
+        ElementProxy(RemoteMemory& rmem, RemoteAddress addr)
+            : rmem_{rmem}, addr_{addr} {}
+        ~ElementProxy() = default;
+        ElementProxy(const ElementProxy&) = delete;
+        void operator=(const ElementProxy&) = delete;
+
+        operator element_type()
+        {
+            return rmem_.read<element_type>(addr_);
+        }
+        element_type operator=(T val)
+        {
+            return rmem_.write<element_type>(addr_, val);
+        }
+
+        RemoteMemory& rmem_;
+        const RemoteAddress addr_;
+    };
 
 private:
     RemoteMemory* rmem_ = nullptr;

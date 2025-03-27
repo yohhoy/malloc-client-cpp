@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 #include <format>
 #include <iostream>
-#include <string>
 #include "malloc-client.hpp"
 
 
