@@ -21,10 +21,25 @@ FetchContent_Declare(
     GIT_TAG v3.11.3
 )
 FetchContent_MakeAvailable(json)
+# https://github.com/kokkos/mdspan
+FetchContent_Declare(
+    mdspan
+    GIT_REPOSITORY https://github.com/kokkos/mdspan.git
+    GIT_TAG mdspan-0.6.0
+)
+FetchContent_MakeAvailable(mdspan)
 
-add_executable(malloc-client
-    malloc-client.cpp)
+add_executable(malloc-client malloc-client.cpp)
+target_include_directories(malloc-client PRIVATE include)
+target_compile_options(malloc-client PRIVATE -Wall -Wextra -pedantic)
 target_link_libraries(malloc-client PRIVATE
     cpr::cpr
     nlohmann_json::nlohmann_json)
-target_compile_options(malloc-client PRIVATE -Wall -Wextra -pedantic)
+
+add_executable(mdspan-demo mdspan-demo.cpp)
+target_include_directories(mdspan-demo PRIVATE include)
+target_compile_options(mdspan-demo PRIVATE -Wall -Wextra -pedantic)
+target_link_libraries(mdspan-demo PRIVATE
+    cpr::cpr
+    nlohmann_json::nlohmann_json
+    std::mdspan)

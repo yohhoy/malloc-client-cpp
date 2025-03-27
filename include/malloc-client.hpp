@@ -1,7 +1,7 @@
 // malloc-client.hpp
 // SPDX-License-Identifier: MIT
-#ifndef MALLOC_CLIENT_HPP
-#define MALLOC_CLIENT_HPP
+#ifndef MALLOC_CLIENT_HPP_
+#define MALLOC_CLIENT_HPP_
 
 #include <string>
 #include <type_traits>
@@ -85,13 +85,14 @@ public:
     }
 
     template <typename T>
-    void write(RemoteAddress addr, T val) {
+    T write(RemoteAddress addr, T val) {
         static_assert(std::is_trivially_copyable_v<T>, "T shall be trivially copyable.");
         std::uint8_t mem[sizeof(T)];
         std::memcpy(mem, &val, sizeof(T));
         for (size_t i = 0; i < sizeof(T); i++) {
             write_byte(addr + i, mem[i]);
         }
+        return val;
     }
 
 private:
@@ -101,4 +102,4 @@ private:
 
 } // namespace mc
 
-#endif // MALLOC_CLIENT_HPP
+#endif // MALLOC_CLIENT_HPP_
