@@ -14,13 +14,13 @@ int main()
   std::cout << "addr:" << addr << std::endl;
 
   rmem.write_byte(addr, 128);
-  std::cout << std::format("byte:{}", rmem.read_byte(addr)) << std::endl;
+  rmem.write<int>(addr + 4, 1234567890);
+  rmem.write<double>(addr + 8, 3.14159265);
 
-  rmem.write<int>(addr, 1234567890);
-  std::cout << std::format("int:{}", rmem.read<int>(addr)) << std::endl;
-
-  rmem.write<double>(addr, 3.14159265);
-  std::cout << std::format("double:{}", rmem.read<double>(addr)) << std::endl;
+  std::cout
+    << std::format("byte:{}\n", rmem.read_byte(addr))
+    << std::format("int:{}\n", rmem.read<int>(addr + 4))
+    << std::format("double:{}\n", rmem.read<double>(addr + 8));
 
   rmem.free(addr);
 }

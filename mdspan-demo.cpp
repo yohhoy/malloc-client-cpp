@@ -1,10 +1,9 @@
 // mdspan-demo.cpp
 // SPDX-License-Identifier: MIT
 #include <iostream>
-#include <numeric>
 // kokkos/mdspan
 #include <experimental/mdspan>
-namespace stdex = std::experimental;
+namespace stdx = std::experimental;
 
 #include "malloc-client-mdspan.hpp"
 
@@ -12,16 +11,17 @@ namespace stdex = std::experimental;
 int main()
 {
   std::cout << "malloc REST client: mdspan-demo" << std::endl;
+  constexpr int N = 10;
 
   // allocate remote memory on malloc-server
   mc::RemoteMemory rmem;
-  auto addr = rmem.malloc(sizeof(int) * 10);
+  mc::RemoteAddress addr = rmem.malloc(sizeof(int) * N);
 
   // create `mdspan` as a view of remote memory
-  using extents_type = stdex::dextents<size_t, 1>;
-  using mapping_type = stdex::layout_right::mapping<extents_type>;
+  using extents_type = stdx::dextents<size_t, 1>;  // 1D-array[dynamic]
+  using mapping_type = stdx::layout_right::mapping<extents_type>;
   using accessor_type = mc::RemoteMemoryAccessor<int>;
-  stdex::mdspan arr{addr, mapping_type{extents_type{10}}, accessor_type{rmem}};
+  stdx::mdspan arr{addr, mapping_type{extents_type{N}}, accessor_type{rmem}};
 
   // write to remote memory
   for (size_t i = 0; i < arr.extent(0); i++) {

@@ -4,22 +4,27 @@
 #define MALLOC_CLIENT_MDSPAN_HPP_
 
 #include <cassert>
+#include <type_traits>
 #include "malloc-client.hpp"
+
 
 namespace mc {
 
-// AccessorPolicy of std::mdspan
-template <typename T>
+// AccessorPolicy of std::mdspan class template
+template <typename ElementType>
 class RemoteMemoryAccessor {
     struct ElementProxy;
 public:
-    using element_type = T;
+    using element_type = ElementType;
     using data_handle_type = RemoteAddress;
     using reference = ElementProxy;
-    using offset_policy = RemoteMemoryAccessor<T>;
+    using offset_policy = RemoteMemoryAccessor<ElementType>;
+
+    static_assert(std::is_trivially_copyable_v<ElementType>,
+        "ElementType shall be trivially copyable.");
 
     RemoteMemoryAccessor() = default;
-    RemoteMemoryAccessor(RemoteMemory& rmem)
+    explicit RemoteMemoryAccessor(RemoteMemory& rmem)
         : rmem_(&rmem) {}
     ~RemoteMemoryAccessor() = default;
     RemoteMemoryAccessor(const RemoteMemoryAccessor&) = default;
@@ -28,12 +33,12 @@ public:
     reference access(data_handle_type p, size_t i) const
     {
         assert(rmem_ != nullptr);
-        return reference{*rmem_, p + sizeof(T) * i};
+        return {*rmem_, p + sizeof(element_type) * i};
     }
 
     data_handle_type offset(data_handle_type p, size_t i) const noexcept
     {
-        return p + sizeof(T) * i;
+        return p + sizeof(element_type) * i;
     }
 
 private:
@@ -48,7 +53,7 @@ private:
         {
             return rmem_.read<element_type>(addr_);
         }
-        element_type operator=(T val)
+        element_type operator=(element_type val)
         {
             return rmem_.write<element_type>(addr_, val);
         }
